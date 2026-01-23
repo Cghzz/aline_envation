@@ -1,6 +1,8 @@
 import sys
 import pygame
 from pygame.event import Event
+from time import sleep
+from gamestats import GameStats
 
 from bullet import Bullet
 from settings import Settings
@@ -25,6 +27,10 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self._create_aliens()
+        #创建一个用于存储游戏统计信息的实例
+        self.stats=GameStats(self)
+
     def run_game(self):
         '''开始游戏主循环'''
         while True:
@@ -32,8 +38,6 @@ class AlienInvasion:
             self.ship.update()
             self._update_bullets()
 
-
-            self._create_aliens()
             self._update_aliens()
             self._update_screen()
 
@@ -45,6 +49,17 @@ class AlienInvasion:
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
         # print(len(self.bullets))
+        #检查是否有子弹击中了外星人
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        '''响应子弹与外星人碰撞'''
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens,
+                                                True, True)
+        if not self.aliens:
+            # 删除现有子弹并创建一群新的外星人
+            self.bullets.empty()
+            self._create_aliens()
 
     def _check_events(self):
         '''响应按键和鼠标事件'''
@@ -147,7 +162,37 @@ class AlienInvasion:
 
     def _update_aliens(self):
         '''更新外星人群中所有外星人的移动'''
+        self._check_fleet_edges()
         self.aliens.update()
+        self._ship_hit()
+        # 检测外星人与飞船之间的碰撞
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._ship_hit()
+
+    def _ship_hit(self):
+        '''响应飞船被外星人撞到'''
+        #将ship_left-1
+        self.stats.ships_left -= 1
+        #清空余下的外星人和子弹
+        self.aliens.empty()
+        self.bullets.empty()
+        #创建一群新的外新人,并将飞船放到屏幕底端中央
+        self._create_aliens()
+        self.ship.center_ship()
+        #暂停
+        sleep(1)
+
+    def _check_fleet_edges(self):
+        '''有外星人到达边缘时采取相应的措施'''
+        for aline in self.aliens.sprites():
+            if aline.check_edges():
+                self._change_fleet_direction()
+
+    def _change_fleet_direction(self):
+        '''将整行外星人下移,并改变他们的方向'''
+        for aline in self.aliens.sprites():
+            aline.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
 
 
 if __name__ == '__main__':
