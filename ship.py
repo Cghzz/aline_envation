@@ -1,13 +1,14 @@
 import pygame
 
 from settings import Settings
+from pygame.sprite import Sprite
 
-
-class Ship:
+class Ship(Sprite):
     '''管理飞船的类'''
 
     def __init__(self, ai_game):
         '''初始化飞船并设置其初始位置'''
+        super().__init__()
         self.screen = ai_game.screen
         self.screen_rect = ai_game.screen.get_rect()
         self.settings=Settings();
@@ -31,13 +32,15 @@ class Ship:
 
     def update(self):
         '''根据移动标准来调整飞船位置'''
-        if self.moving_right and self.rect.x<self.screen_rect.width-self.rect.width:
+        if (self.moving_right and self.rect.right<
+                self.screen_rect.right):
             self.x += self.settings.ship_speed
         if self.moving_left and self.rect.x>0:
             self.x -= self.settings.ship_speed
         if self.moving_up and self.rect.y>0:
             self.y -= self.settings.ship_speed
-        if self.moving_down and self.rect.y<self.screen_rect.height-self.rect.height:
+        if (self.moving_down and self.rect.left<
+                self.screen_rect.left):
             self.y += self.settings.ship_speed
 
         #根据self.x更新rect对象
@@ -46,4 +49,6 @@ class Ship:
 
     def center_ship(self):
         self.rect.midbottom=self.screen_rect.midbottom
+        print(self.rect)
         self.x=float(self.rect.x)
+        self.y=float(self.rect.y)
