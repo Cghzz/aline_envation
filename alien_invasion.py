@@ -11,6 +11,7 @@ from ship import Ship
 from alien import Alien
 from button import Button
 
+
 class AlienInvasion:
     '''管理游戏资源和行为的类'''
 
@@ -32,12 +33,15 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self._create_aliens()
+
         #创建一个用于存储游戏统计信息的实例
         self.stats=GameStats(self)
+        self.stats.getRecord()
         #创建一个Button按钮
         self.button=Button(self,'Play')
         #创建一个记分牌
         self.sb=Scoreboard(self)
+
 
     def run_game(self):
         '''开始游戏主循环'''
@@ -75,6 +79,11 @@ class AlienInvasion:
             self.bullets.empty()
             self._create_aliens()
             self.settings.increase_speed()
+            print('分数:'+str(self.settings.alien_points))
+            print('外星人速度:'+str(self.settings.alien_speed))
+            print('子弹速度:'+str(self.settings.bullet_speed))
+            print('飞船速度:'+str(self.settings.ship_speed))
+
             #提高等级
             self.stats.level+=1
             self.sb.prep_level()
@@ -84,6 +93,7 @@ class AlienInvasion:
         # 监听键盘和鼠标事件
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.stats.saverecord()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_event(event)
@@ -130,9 +140,11 @@ class AlienInvasion:
             self.ship.moving_down = True
         # 按q键退出游戏
         elif event.key == pygame.K_q:
+            self.stats.saverecord()
             sys.exit()
         # 按esc键退出游戏
         elif event.key == pygame.K_ESCAPE:
+            self.stats.saverecord()
             sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
@@ -169,21 +181,21 @@ class AlienInvasion:
         #创建一个外星人并计算一行可以容纳多个外星人
 
         alien=Alien(self)
-        alien_width,aline_height=alien.rect.size
+        alien_width,alien_height=alien.rect.size
         #计算一行可以容纳多少外星人群
-        available_space_x = self.settings.screen_width-2*alien_width
+        available_space_x = self.settings.screen_width-3*alien_width
         number_aliens_x=available_space_x//(alien_width*2)
         #计算可以容纳几行外星人群
         ship_height=self.ship.rect.height
-        available_space_y = (self.settings.screen_height-3*ship_height
+        available_space_y = (self.settings.screen_height-5*alien_height
                              -ship_height)
-        number_rows=available_space_y//(aline_height*2)-1
+        number_rows=available_space_y//(alien_height*2)
         #创建外星人
         for number_row in range(number_rows):
             for alien_number in range(number_aliens_x):
                 alien=Alien(self)
                 alien.x=alien_width+2*alien_width*alien_number
-                alien.y=aline_height*2+2*aline_height*number_row
+                alien.y=alien_height*2+2*alien_height*number_row
                 alien.rect.x=alien.x
                 alien.rect.y=alien.y
                 self.aliens.add(alien)
@@ -223,11 +235,13 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             if alien.check_edges():
                 self._change_fleet_direction()
+                break
 
     def _change_fleet_direction(self):
         '''将整行外星人下移,并改变他们的方向'''
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
+
         self.settings.fleet_direction *= -1
 
     def _check_aliens_bottom(self):
