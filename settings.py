@@ -11,13 +11,14 @@ class Settings:
         self.ship_limit = 3
         # 子弹设置
         self.bullet_speed = 1
-        self.bullet_width = 3000
+        self.bullet_width = 3
         self.bullet_height = 6
         self.bullet_color = (200, 0, 0)
         self.bullets_allowed = 500
 
         # 外星人设置
         self.alien_speed = 0.2
+
         self.fleet_drop_speed = 1
         self.fleet_direction = 1
 

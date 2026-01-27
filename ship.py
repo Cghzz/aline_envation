@@ -39,8 +39,8 @@ class Ship(Sprite):
             self.x -= self.settings.ship_speed
         if self.moving_up and self.rect.y>0:
             self.y -= self.settings.ship_speed
-        if (self.moving_down and self.rect.left<
-                self.screen_rect.left):
+        if (self.moving_down and self.rect.bottom<
+                self.screen_rect.bottom):
             self.y += self.settings.ship_speed
 
         #根据self.x更新rect对象
