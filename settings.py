@@ -27,6 +27,14 @@ class Settings:
         self.score_scale = 1.5
         self.initialize_dynamic_settings()
 
+        # 音频文件
+        self.bgm_music='./music/bgm.mp3'
+        self.bump_music='./music/bump.mp3'
+        self.hit_music='./music/hit.mp3'
+        self.shoot_music='./music/shoot.mp3'
+        # 音量
+        self.volume=0.5
+
     def initialize_dynamic_settings(self):
         '''初始化随游戏进行而变化的设置'''
         self.ship_speed = 1.0

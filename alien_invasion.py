@@ -41,7 +41,10 @@ class AlienInvasion:
         self.button=Button(self,'Play')
         #创建一个记分牌
         self.sb=Scoreboard(self)
-
+        # 播放音乐
+        pygame.mixer.music.load(self.settings.bgm_music)
+        pygame.mixer.music.set_volume(self.settings.volume)  # 设置音量
+        pygame.mixer.music.play(-1)
 
     def run_game(self):
         '''开始游戏主循环'''
@@ -73,16 +76,17 @@ class AlienInvasion:
                 self.stats.score += self.settings.alien_points*len(aliens)
                 self.sb.prep_score()
                 self.sb.check_high_score()
-
+            # 播放外星人被射杀音效
+            self._alien_hit_music()
         if not self.aliens:
             # 删除现有子弹并创建一群新的外星人
             self.bullets.empty()
             self._create_aliens()
             self.settings.increase_speed()
-            print('分数:'+str(self.settings.alien_points))
-            print('外星人速度:'+str(self.settings.alien_speed))
-            print('子弹速度:'+str(self.settings.bullet_speed))
-            print('飞船速度:'+str(self.settings.ship_speed))
+            # print('分数:'+str(self.settings.alien_points))
+            # print('外星人速度:'+str(self.settings.alien_speed))
+            # print('子弹速度:'+str(self.settings.bullet_speed))
+            # print('飞船速度:'+str(self.settings.ship_speed))
 
             #提高等级
             self.stats.level+=1
@@ -147,7 +151,10 @@ class AlienInvasion:
             self.stats.saverecord()
             sys.exit()
         elif event.key == pygame.K_SPACE:
+            # 按空格键射击
             self._fire_bullet()
+            # 播放射击音效
+            self._fire_bgm()
 
     def _fire_bullet(self):
         '''创建一颗子弹,并将其加入编组bullets中'''
@@ -209,6 +216,7 @@ class AlienInvasion:
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
             self._ship_hit()
 
+
         #检测是否有外星人到达屏幕底部
         self._check_aliens_bottom()
 
@@ -224,8 +232,10 @@ class AlienInvasion:
             self._create_aliens()
             self.ship.center_ship()
             # print('碰撞时飞船位置:'+str(self.ship.rect))
+            # 播放飞船坠毁音效
+            self._ship_bump_bgm()
             #暂停
-            sleep(0.2)
+            sleep(0.5)
         else:
             self.stats.game_active=False
             pygame.mouse.set_visible(True)
@@ -273,6 +283,23 @@ class AlienInvasion:
             # 隐藏鼠标光标
             pygame.mouse.set_visible(False)
 
+    def _fire_bgm(self):
+        sound = pygame.mixer.Sound(self.settings.shoot_music)
+        if (self.stats.level > 10):
+            sound.set_volume(1)
+        else:
+            sound.set_volume(0.1 * self.stats.level)
+        sound.play()
+
+    def _ship_bump_bgm(self):
+        sound = pygame.mixer.Sound(self.settings.bump_music)
+        sound.set_volume(1)
+        sound.play()
+
+    def _alien_hit_music(self):
+        sound = pygame.mixer.Sound(self.settings.hit_music)
+        sound.set_volume(1)
+        sound.play()
 
 
 if __name__ == '__main__':
